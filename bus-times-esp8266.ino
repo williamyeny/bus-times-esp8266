@@ -1,3 +1,4 @@
+#include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include "keys.h"
@@ -18,7 +19,7 @@ void setup()
   Serial.println("Connected!");
 
 
-//  Serial.println("Connected, IP address: " + WiFi.localIP());
+  Serial.println("Connected, IP address: " + WiFi.localIP());
   Serial.println("Mac address: " + WiFi.macAddress());
 
   HTTPClient http;
@@ -39,8 +40,19 @@ void setup()
 
     // file found at server
     if(httpCode == HTTP_CODE_OK) {
-       String payload = http.getString();
-       Serial.println(payload);
+      String payload = http.getString();
+      Serial.println(payload);
+
+      DynamicJsonBuffer jsonBuffer(2448);
+      JsonObject& root = jsonBuffer.parseObject(payload);
+
+      if (!root.success()) {
+        Serial.println("whoops");
+      }
+      
+      int data = root["expires_in"];
+
+      Serial.println(data);
     }
   } else {
     Serial.println("[HTTP] GET... failed, error: " + http.errorToString(httpCode));
